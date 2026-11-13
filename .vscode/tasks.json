@@ -1,0 +1,17 @@
+{
+  // Atalhos do projeto no VS Code
+  //   Ctrl+Shift+B  -> roda o jogo
+  // (Tudo é assembly: não há conversor. Os desenhos ficam em src/dados/graficos.s.)
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Rodar o jogo",
+      "type": "process",
+      "command": "${workspaceFolder}/fpgrars.exe",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "clear": true },
+      "problemMatcher": []
+    }
+  ]
+}

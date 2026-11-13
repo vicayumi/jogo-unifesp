@@ -1,0 +1,4 @@
+{
+  // O VS Code sugere instalar esta extensão ao abrir a pasta (cores no assembly)
+  "recommendations": ["zhwu95.riscv"]
+}

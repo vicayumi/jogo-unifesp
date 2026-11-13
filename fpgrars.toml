@@ -1,0 +1,10 @@
+# Configuração do FPGRARS (lida automaticamente quando ele roda nesta pasta)
+file = "src/main.s"
+width = 320
+height = 240
+scale = 2          # tamanho de cada pixel na janela; mude para 3 se quiser a janela maior
+
+# o FPGRARS exige estas três linhas no arquivo, mesmo que sejam false
+no_video = false
+print_instructions = false
+print_state = false
