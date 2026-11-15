@@ -3,12 +3,17 @@
 #
 #  Cada bloco do mapa tem um número (0 = vazio). A tabela bloco_solido diz
 #  quais números têm colisão (1) e quais são só enfeite (0). Para criar um
-#  bloco sólido novo, desenhe graficos/blocos/N_nome.png e ponha 1 na posição N.
+#  bloco sólido novo, desenhe o bloco em dados/graficos.s e ponha 1 na posição N.
+#
+#  A tabela bloco_perigo diz quais blocos MACHUCAM quem pisa neles
+#  (espinhos da Fase 2 e curto-circuito da Fase 3). Eles também são sólidos:
+#  o estudante pisa, perde um coração e é jogado para cima (jogador.s).
 ############################################################################
 
 .data
 #                  0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
-bloco_solido: .byte 0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+bloco_solido: .byte 0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,0,1,1,0,0,0,0,0,0
+bloco_perigo: .byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0
 .align 2
 
 .text
@@ -51,6 +56,36 @@ ps_mapa:
     ret
 ps_sim:
     li   a0, 1
+    ret
+
+
+# --------------------------------------------------------------------------
+# ponto_perigo: o pixel (x, y) do MUNDO está num bloco que machuca?
+#   a0 = x    a1 = y   ->   a0 = 1 se é perigo (espinhos, curto-circuito)
+# --------------------------------------------------------------------------
+ponto_perigo:
+    bltz a0, pp_nao
+    bltz a1, pp_nao
+    li   t0, ALTURA_TELA
+    bge  a1, t0, pp_nao
+    la   t0, mapa_atual
+    lw   t0, 0(t0)
+    lw   t3, 0(t0)
+    srli t1, a0, 4
+    bge  t1, t3, pp_nao
+    srli t2, a1, 4
+    mul  t2, t2, t3
+    add  t2, t2, t1
+    add  t2, t2, t0
+    lbu  t2, 8(t2)
+    la   t1, morte_info                # (se machucar, o filminho mostra este bloco)
+    sw   t2, 0(t1)
+    la   t0, bloco_perigo
+    add  t0, t0, t2
+    lbu  a0, 0(t0)
+    ret
+pp_nao:
+    li   a0, 0
     ret
 
 

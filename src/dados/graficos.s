@@ -2567,6 +2567,10 @@ img_bloco_9:
 # Tabela de blocos: blocos[n] = endereço da imagem do bloco n (0 = vazio)
 blocos:
 .word 0, img_bloco_1, img_bloco_2, img_bloco_3, img_bloco_4, img_bloco_5, img_bloco_6, img_bloco_7, img_bloco_8, img_bloco_9, img_bloco_10, img_bloco_11, img_bloco_12, img_bloco_13, img_bloco_14, img_bloco_15, img_bloco_16, img_bloco_17, img_bloco_18
+# blocos das fases 2 e 3 (desenhados em dados/graficos_fases23.s)
+#      19 J piso lab    20 K piso lab   21 L bancada   22 M caixa     23 N placa     24 O placa
+#      25 P chip        26 Q servidor   27 R capacitor 28 S espinhos  29 T curto-circuito
+.word img_bloco_19, img_bloco_20, img_bloco_21, img_bloco_22, img_bloco_23, img_bloco_24, img_bloco_25, img_bloco_26, img_bloco_27, img_bloco_28, img_bloco_29
 
 # ============================== MAPAS ===============================
 # calculo: 80 colunas x 15 linhas (4 tela(s))
@@ -2674,8 +2678,41 @@ tabela_desenhos:
 .word img_bloco_7, pal_bloco_7
 .word img_bloco_8, pal_bloco_8
 .word img_bloco_9, pal_bloco_9
+# fases 2 e 3 (dados/graficos_fases23.s)
+.word img_relogio, pal_relogio
+.word img_relogio_mini, pal_relogio_mini
+.word img_monstro_ponteiro, pal_monstro_ponteiro
+.word img_monstro_pilha, pal_monstro_pilha
+.word img_monstro_no, pal_monstro_no
+.word img_monstro_bit, pal_monstro_bit
+.word img_monstro_bug, pal_monstro_bug
+.word img_monstro_porta, pal_monstro_porta
+.word img_proj_seta, pal_proj_seta
+.word img_proj_bit1, pal_proj_bit1
+.word img_proj_bit0, pal_proj_bit0
+.word img_chefe_grafo, pal_chefe_grafo
+.word img_chefe_grafo_aberto, pal_chefe_grafo_aberto
+.word img_chefe_professor, pal_chefe_professor
+.word img_chefe_professor_aberto, pal_chefe_professor_aberto
+.word img_bloco_19, pal_bloco_19
+.word img_bloco_20, pal_bloco_20
+.word img_bloco_21, pal_bloco_21
+.word img_bloco_22, pal_bloco_22
+.word img_bloco_23, pal_bloco_23
+.word img_bloco_24, pal_bloco_24
+.word img_bloco_25, pal_bloco_25
+.word img_bloco_26, pal_bloco_26
+.word img_bloco_27, pal_bloco_27
+.word img_bloco_28, pal_bloco_28
+.word img_bloco_29, pal_bloco_29
+.word img_fundo_lab_parede, pal_fundo_lab_parede
+.word img_fundo_circuito_parede, pal_fundo_circuito_parede
+.word img_fundo_lab_quadro, pal_fundo_lab_quadro
+.word img_fundo_lab_mesas, pal_fundo_lab_mesas
+.word img_fundo_circuito_trilhas, pal_fundo_circuito_trilhas
+.word img_fundo_circuito_servidores, pal_fundo_circuito_servidores
 .word 0
 
 # mapas (termina com 0)
 tabela_mapas:
-.word mapa_calculo, mapa_fase1, 0
+.word mapa_calculo, mapa_fase1, mapa_aed, mapa_aoc, 0

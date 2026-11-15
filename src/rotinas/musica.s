@@ -6,6 +6,12 @@
 #     musica_treino    alegre    (~128 BPM, dó maior: onda quadrada, baixo "um-pá" e piano)
 #     musica_calculo   agitada   (~150 BPM, lá menor: metais, baixo de oitavas e caixa)
 #     musica_chefe     frenética (~200 BPM, mi menor: dente de serra, baixo e taiko)
+#                      (Livro do Stewart e o Grafo)
+#     musica_aed       misteriosa (~150 BPM, ré menor: vibrafone e baixo synth)   Fase 2
+#     musica_aoc       eletrônica (~164 BPM, lá menor: chiptune e baixo synth)    Fase 3
+#     musica_chefe_final  épica (~180 BPM, dó menor: guitarra, baixo e tímpano)   Professor
+#  As trilhas novas têm menos notas por segundo (4 a 6) para gastar menos do
+#  orçamento de ecalls (veja ORÇAMENTO abaixo): o jogo agora tem 4 fases.
 #  As trilhas são loops: no fim voltam para o começo.
 #
 #  FORMATO (igual ao dos efeitos de sfx.s):
@@ -417,3 +423,216 @@ musica_chefe:
 .word  0,  47,  276,  38,  92   # B2
 .word -2, 18                       # volta para o começo
 
+
+# ---------------------------- trilhas das Fases 2 e 3 ----------------------------
+# musica_aed: Fase 2 (AED), ré menor, ~150 BPM: vibrafone e baixo synth - 54 notas em 12.8 s (4.2 notas por segundo)
+musica_aed:
+# compasso 1 (Dm)
+.word  0,  38,  800,  38,  90   # D2
+.word  0,  74,  400,  11,  95   # D5
+.word 24,  77,  200,  11,  95   # F5
+.word 12,  81,  200,  11,  95   # A5
+.word 12,  45,  800,  38,  90   # A2
+.word  0,  79,  400,  11,  95   # G5
+.word 24,  77,  200,  11,  95   # F5
+.word 12,  76,  200,  11,  95   # E5
+# compasso 2 (Bb)
+.word 12,  34,  800,  38,  90   # Bb1
+.word  0,  74,  600,  11,  95   # D5
+.word 36,  72,  200,  11,  95   # C5
+.word 12,  41,  800,  38,  90   # F2
+.word  0,  74,  400,  11,  95   # D5
+.word 24,  77,  400,  11,  95   # F5
+# compasso 3 (C)
+.word 24,  36,  800,  38,  90   # C2
+.word  0,  76,  400,  11,  95   # E5
+.word 24,  79,  200,  11,  95   # G5
+.word 12,  84,  200,  11,  95   # C6
+.word 12,  43,  800,  38,  90   # G2
+.word  0,  82,  400,  11,  95   # Bb5
+.word 24,  81,  200,  11,  95   # A5
+.word 12,  79,  200,  11,  95   # G5
+# compasso 4 (A)
+.word 12,  33,  800,  38,  90   # A1
+.word  0,  81,  800,  11,  95   # A5
+.word 48,  40,  800,  38,  90   # E2
+.word  0,  73,  400,  11,  95   # C#5
+.word 24,  76,  400,  11,  95   # E5
+# compasso 5 (Dm)
+.word 24,  38,  800,  38,  90   # D2
+.word  0,  77,  400,  11,  95   # F5
+.word 24,  81,  200,  11,  95   # A5
+.word 12,  86,  200,  11,  95   # D6
+.word 12,  45,  800,  38,  90   # A2
+.word  0,  84,  400,  11,  95   # C6
+.word 24,  81,  400,  11,  95   # A5
+# compasso 6 (Gm)
+.word 24,  31,  800,  38,  90   # G1
+.word  0,  82,  400,  11,  95   # Bb5
+.word 24,  81,  200,  11,  95   # A5
+.word 12,  79,  200,  11,  95   # G5
+.word 12,  38,  800,  38,  90   # D2
+.word  0,  74,  800,  11,  95   # D5
+# compasso 7 (Bb)
+.word 48,  34,  800,  38,  90   # Bb1
+.word  0,  77,  400,  11,  95   # F5
+.word 24,  76,  200,  11,  95   # E5
+.word 12,  74,  200,  11,  95   # D5
+.word 12,  36,  800,  38,  90   # C2
+.word  0,  76,  400,  11,  95   # E5
+.word 24,  79,  400,  11,  95   # G5
+# compasso 8 (A)
+.word 24,  33,  800,  38,  90   # A1
+.word  0,  81,  400,  11,  95   # A5
+.word 24,  79,  200,  11,  95   # G5
+.word 12,  76,  200,  11,  95   # E5
+.word 12,  45,  800,  38,  90   # A2
+.word  0,  73,  400,  11,  95   # C#5
+.word 24,  69,  400,  11,  95   # A4
+.word -2, 24                       # volta para o começo
+
+# musica_aoc: Fase 3 (AOC), lá menor, ~164 BPM: chiptune (onda quadrada) e baixo synth - 54 notas em 11.7 s (4.6 notas por segundo)
+musica_aoc:
+# compasso 1 (Am)
+.word  0,  45,  550,  38,  95   # A2
+.word  0,  81,  183,  80,  72   # A5
+.word 11,  84,  183,  80,  72   # C6
+.word 11,  88,  367,  80,  72   # E6
+.word 22,  45,  550,  38,  95   # A2
+.word  0,  86,  183,  80,  72   # D6
+.word 11,  84,  183,  80,  72   # C6
+.word 11,  83,  367,  80,  72   # B5
+# compasso 2 (F)
+.word 22,  41,  550,  38,  95   # F2
+.word  0,  84,  550,  80,  72   # C6
+.word 33,  81,  183,  80,  72   # A5
+.word 11,  41,  550,  38,  95   # F2
+.word  0,  77,  367,  80,  72   # F5
+.word 22,  81,  367,  80,  72   # A5
+# compasso 3 (G)
+.word 22,  43,  550,  38,  95   # G2
+.word  0,  83,  183,  80,  72   # B5
+.word 11,  86,  183,  80,  72   # D6
+.word 11,  91,  367,  80,  72   # G6
+.word 22,  43,  550,  38,  95   # G2
+.word  0,  89,  183,  80,  72   # F6
+.word 11,  88,  183,  80,  72   # E6
+.word 11,  86,  367,  80,  72   # D6
+# compasso 4 (E)
+.word 22,  40,  550,  38,  95   # E2
+.word  0,  88,  733,  80,  72   # E6
+.word 44,  40,  550,  38,  95   # E2
+.word  0,  80,  367,  80,  72   # G#5
+.word 22,  83,  367,  80,  72   # B5
+# compasso 5 (Am)
+.word 22,  45,  550,  38,  95   # A2
+.word  0,  88,  183,  80,  72   # E6
+.word 11,  86,  183,  80,  72   # D6
+.word 11,  84,  183,  80,  72   # C6
+.word 11,  83,  183,  80,  72   # B5
+.word 11,  45,  550,  38,  95   # A2
+.word  0,  81,  367,  80,  72   # A5
+.word 22,  76,  367,  80,  72   # E5
+# compasso 6 (Dm)
+.word 22,  38,  550,  38,  95   # D2
+.word  0,  77,  367,  80,  72   # F5
+.word 22,  81,  367,  80,  72   # A5
+.word 22,  38,  550,  38,  95   # D2
+.word  0,  86,  367,  80,  72   # D6
+.word 22,  84,  367,  80,  72   # C6
+# compasso 7 (F)
+.word 22,  41,  550,  38,  95   # F2
+.word  0,  84,  367,  80,  72   # C6
+.word 22,  83,  183,  80,  72   # B5
+.word 11,  81,  183,  80,  72   # A5
+.word 11,  43,  550,  38,  95   # G2
+.word  0,  83,  367,  80,  72   # B5
+.word 22,  86,  367,  80,  72   # D6
+# compasso 8 (E)
+.word 22,  40,  550,  38,  95   # E2
+.word  0,  88,  367,  80,  72   # E6
+.word 22,  83,  367,  80,  72   # B5
+.word 22,  28,  550,  38,  95   # E1
+.word  0,  80,  367,  80,  72   # G#5
+.word 22,  76,  367,  80,  72   # E5
+.word -2, 22                       # volta para o começo
+
+# musica_chefe_final: chefão final (Professor), dó menor, ~180 BPM: guitarra distorcida, baixo e tímpano - 68 notas em 10.7 s (6.4 notas por segundo)
+musica_chefe_final:
+# compasso 1 (Cm)
+.word  0,  36,  333,  38, 100   # C2
+.word  0,  36,  333,  47, 115   # C2
+.word  0,  72,  333,  30,  70   # C5
+.word 20,  36,  333,  38, 100   # C2
+.word  0,  75,  333,  30,  70   # Eb5
+.word 20,  36,  333,  38, 100   # C2
+.word  0,  79,  333,  30,  70   # G5
+.word 20,  36,  333,  38, 100   # C2
+.word  0,  84,  333,  30,  70   # C6
+# compasso 2 (Ab)
+.word 20,  32,  333,  38, 100   # Ab1
+.word  0,  36,  333,  47, 115   # C2
+.word  0,  84,  500,  30,  70   # C6
+.word 20,  32,  333,  38, 100   # Ab1
+.word 10,  82,  167,  30,  70   # Bb5
+.word 10,  32,  333,  38, 100   # Ab1
+.word  0,  80,  667,  30,  70   # Ab5
+.word 20,  32,  333,  38, 100   # Ab1
+# compasso 3 (Bb)
+.word 20,  34,  333,  38, 100   # Bb1
+.word  0,  36,  333,  47, 115   # C2
+.word  0,  74,  333,  30,  70   # D5
+.word 20,  34,  333,  38, 100   # Bb1
+.word  0,  77,  333,  30,  70   # F5
+.word 20,  34,  333,  38, 100   # Bb1
+.word  0,  82,  333,  30,  70   # Bb5
+.word 20,  34,  333,  38, 100   # Bb1
+.word  0,  86,  333,  30,  70   # D6
+# compasso 4 (G)
+.word 20,  31,  333,  38, 100   # G1
+.word  0,  36,  333,  47, 115   # C2
+.word  0,  83,  667,  30,  70   # B5
+.word 20,  31,  333,  38, 100   # G1
+.word 20,  31,  333,  38, 100   # G1
+.word  0,  79,  333,  30,  70   # G5
+.word 20,  31,  333,  38, 100   # G1
+.word  0,  77,  333,  30,  70   # F5
+# compasso 5 (Cm)
+.word 20,  36,  333,  38, 100   # C2
+.word  0,  36,  333,  47, 115   # C2
+.word  0,  79,  333,  30,  70   # G5
+.word 20,  36,  333,  38, 100   # C2
+.word  0,  75,  333,  30,  70   # Eb5
+.word 20,  36,  333,  38, 100   # C2
+.word  0,  72,  333,  30,  70   # C5
+.word 20,  36,  333,  38, 100   # C2
+.word  0,  75,  333,  30,  70   # Eb5
+# compasso 6 (Fm)
+.word 20,  29,  333,  38, 100   # F1
+.word  0,  36,  333,  47, 115   # C2
+.word  0,  77,  333,  30,  70   # F5
+.word 20,  29,  333,  38, 100   # F1
+.word  0,  80,  333,  30,  70   # Ab5
+.word 20,  29,  333,  38, 100   # F1
+.word  0,  84,  667,  30,  70   # C6
+.word 20,  29,  333,  38, 100   # F1
+# compasso 7 (Ab)
+.word 20,  32,  333,  38, 100   # Ab1
+.word  0,  36,  333,  47, 115   # C2
+.word  0,  87,  333,  30,  70   # Eb6
+.word 20,  32,  333,  38, 100   # Ab1
+.word  0,  86,  333,  30,  70   # D6
+.word 20,  32,  333,  38, 100   # Ab1
+.word  0,  84,  333,  30,  70   # C6
+.word 20,  32,  333,  38, 100   # Ab1
+.word  0,  83,  333,  30,  70   # B5
+# compasso 8 (G)
+.word 20,  31,  333,  38, 100   # G1
+.word  0,  36,  333,  47, 115   # C2
+.word  0,  83,  333,  30,  70   # B5
+.word 20,  31,  333,  38, 100   # G1
+.word  0,  86,  333,  30,  70   # D6
+.word 20,  31,  333,  38, 100   # G1
+.word  0,  91,  667,  30,  70   # G6
+.word 20,  31,  333,  38, 100   # G1
+.word -2, 20                       # volta para o começo

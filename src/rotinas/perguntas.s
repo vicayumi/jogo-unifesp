@@ -97,6 +97,8 @@ estado_pergunta:
     sw   s1, 4(sp)
     sw   s2, 8(sp)
 
+    li   a0, 1                         # o cronômetro corre durante a pergunta (telas.s)
+    call atualizar_tempo_fase
     la   t0, pergunta_fase
     lw   t0, 0(t0)
     bnez t0, ep2_resultado
@@ -108,6 +110,16 @@ estado_pergunta:
     sw   t1, 0(t0)
     li   t2, 20
     blt  t1, t2, ep2_desenha
+    li   t0, DEBUG_ATALHOS             # atalho de teste C: responde a certa (debug.s)
+    beqz t0, ep2_teclas
+    li   a0, T_DBG_CERTA
+    call tecla_nova
+    beqz a0, ep2_teclas
+    la   t0, pergunta_atual
+    lw   t0, 0(t0)
+    lw   s1, 20(t0)
+    j    ep2_respondeu
+ep2_teclas:
     li   s1, 0
 ep2_tecla:
     la   t0, teclas_alt
@@ -204,7 +216,8 @@ desenhar_painel_pergunta:
     li   a6, COR_AMARELO
     call desenhar_painel
 
-    la   a0, txt_pergunta_titulo
+    li   a0, CB_PERG_TITULO            # "O FULANO PERGUNTA:" (registro do chefão)
+    call chefe_campo
     li   a1, CENTRO
     li   a2, 38
     li   a3, COR_AMARELO
@@ -274,7 +287,11 @@ dpp_texto_alt:
     li   a3, COR_CINZA
     beqz t0, dpp_rodape
     call resposta_certa
-    la   t0, txt_pergunta_certo
+    mv   t1, a0
+    li   a0, CB_CERTO                  # texto do acerto (registro do chefão)
+    call chefe_campo
+    mv   t0, a0
+    mv   a0, t1
     li   a3, COR_VERDE
     bnez a0, dpp_rodape_txt
     la   t0, txt_pergunta_errado

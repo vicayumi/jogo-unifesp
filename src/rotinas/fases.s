@@ -59,6 +59,16 @@ carregar_fase:
     sw   zero, 0(t0)
 
     # mundo
+    lw   t1, F_TEMPO(s1)               # cronômetro (segundos -> quadros)
+    li   t0, 60
+    mul  t1, t1, t0
+    la   t0, fase_tempo
+    sw   t1, 0(t0)
+    la   t0, morte_causa
+    sw   zero, 0(t0)
+    lw   t1, F_VEL_MONSTROS(s1)        # fases mais difíceis: monstros mais rápidos
+    la   t0, monstros_vel_extra
+    sw   t1, 0(t0)
     lw   a0, F_MONSTROS(s1)
     call iniciar_monstros
     la   t0, arena_ativa

@@ -353,3 +353,79 @@ cenario_sala:
     lw   s1, 4(sp)
     addi sp, sp, 8
     ret
+
+
+# --------------------------------------------------------------------------
+# cenario_lab: fundo da FASE 2 (AED) - o laboratório de computação
+#   parede (degradê azul)  ->  quadro branco com a árvore e cartaz da pilha
+#   ->  mesas com computadores
+#   (desenhos em dados/graficos_fases23.s)
+# --------------------------------------------------------------------------
+cenario_lab:
+    addi sp, sp, -8
+    sw   ra, 0(sp)
+    sw   s1, 4(sp)
+    la   t0, camera_x
+    lw   s1, 0(t0)
+
+    la   a0, fundo
+    la   a1, img_fundo_lab_parede
+    call desenhar_degrade
+
+    la   a0, img_fundo_lab_quadro
+    li   t0, K_QUADRO
+    mul  a1, s1, t0
+    srli a1, a1, 8
+    li   a2, 30
+    call desenhar_camada_rep
+
+    la   a0, img_fundo_lab_mesas
+    li   t0, K_CARTEIRAS
+    mul  a1, s1, t0
+    srli a1, a1, 8
+    li   a2, 176                       # 208 (chão) - 32
+    call desenhar_camada_rep
+
+    lw   ra, 0(sp)
+    lw   s1, 4(sp)
+    addi sp, sp, 8
+    ret
+
+
+# --------------------------------------------------------------------------
+# cenario_circuito: fundo da FASE 3 (AOC) - dentro do computador
+#   parede (degradê azul-esverdeado)  ->  trilhas da placa com CPU, ALU e RAM
+#   ->  servidores
+# --------------------------------------------------------------------------
+.eqv K_TRILHAS        64             # as trilhas andam a 1/4 da câmera (bem longe)
+.eqv K_SERVIDORES     144            # os servidores a ~56%
+
+cenario_circuito:
+    addi sp, sp, -8
+    sw   ra, 0(sp)
+    sw   s1, 4(sp)
+    la   t0, camera_x
+    lw   s1, 0(t0)
+
+    la   a0, fundo
+    la   a1, img_fundo_circuito_parede
+    call desenhar_degrade
+
+    la   a0, img_fundo_circuito_trilhas
+    li   t0, K_TRILHAS
+    mul  a1, s1, t0
+    srli a1, a1, 8
+    li   a2, 24
+    call desenhar_camada_rep
+
+    la   a0, img_fundo_circuito_servidores
+    li   t0, K_SERVIDORES
+    mul  a1, s1, t0
+    srli a1, a1, 8
+    li   a2, 160                       # 208 (chão) - 48
+    call desenhar_camada_rep
+
+    lw   ra, 0(sp)
+    lw   s1, 4(sp)
+    addi sp, sp, 8
+    ret

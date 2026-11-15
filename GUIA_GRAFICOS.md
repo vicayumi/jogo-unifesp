@@ -42,6 +42,10 @@ O `.align 2` antes da imagem é obrigatório, porque a imagem começa com `.word
 
 `.ascii "..rr.rr.."` guarda na memória os códigos das letras (`'.'` = 46, `'r'` = 114...), 1 byte por letra. A rotina `montar_desenhos` monta uma **tabela de tradução** de 256 bytes a partir da paleta (`traducao['r'] = 0x03`...). Depois ela troca, **no próprio lugar**, cada letra pela sua cor. Como 1 letra = 1 byte = 1 pixel, a imagem não muda de tamanho e fica exatamente no formato `.word largura, altura` + 1 byte por pixel, que `desenhar_imagem` usa.
 
+### Fases 2 e 3
+
+Os desenhos das Fases 2 (AED) e 3 (AOC) ficam num arquivo à parte, `src/dados/graficos_fases23.s`, no **mesmo formato**: monstros (ponteiro, pilha, nó, bit, bug, porta lógica), projéteis (seta, bits 0 e 1), os chefões (`img_chefe_grafo`, `img_chefe_professor` e as versões `_aberto`, usadas quando eles perguntam e no filminho), os blocos 19 a 29 (letras `J` a `T` nos mapas), os cenários do laboratório e do circuito e os mapas `mapa_aed` e `mapa_aoc`. Todas as imagens desse arquivo usam as letras de uma mesma "paleta mestre" (o comentário embaixo de cada paleta diz o nome de cada cor). Elas já estão na `tabela_desenhos`, os blocos na tabela `blocos` e os mapas na `tabela_mapas` (`graficos.s`). Em `previa/` há PNGs desses desenhos (`fases23_*.png`, `mapa_aed.png`, `mapa_aoc.png`).
+
 ## 2. Cores
 
 Cada pixel é 1 byte no formato `BBGGGRRR`: 2 bits de azul, 3 de verde e 3 de vermelho (256 cores).

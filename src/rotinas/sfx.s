@@ -231,6 +231,58 @@ SFX_COBRA_VIRA:
 .word 0,  80, 220, 119, 115
 .word -1
 
+# ---------------------------- monstros das Fases 2 (AED) e 3 (AOC) ----------
+# ponteiro (AED): "fiiu" rápido, como uma flecha passando
+SFX_MONSTRO_PONTEIRO:
+.word 3
+.word 0,  91,  60, 81, 110
+.word 2,  84,  60, 81, 110
+.word 2,  77, 120, 81, 105
+.word -1
+
+# pilha (AED): "pof-pof-pof" de caixas empilhando (xilofone grave)
+SFX_MONSTRO_PILHA:
+.word 3
+.word 0,  60,  90, 13, 120
+.word 5,  64,  90, 13, 120
+.word 5,  67, 140, 13, 120
+.word -1
+
+# nó do grafo (AED): "bloop" (marimba subindo)
+SFX_MONSTRO_NO:
+.word 3
+.word 0,  67,  80, 12, 125
+.word 3,  74, 160, 12, 125
+.word -1
+
+# bit (AOC): "bip-bop" de chiptune
+SFX_MONSTRO_BIT:
+.word 3
+.word 0,  96,  50, 80, 105
+.word 4,  84,  80, 80, 105
+.word -1
+
+# bug (AOC): zumbido de besouro (dente de serra grave, curtinho)
+SFX_MONSTRO_BUG:
+.word 3
+.word 0,  43, 140, 81, 115
+.word 4,  44, 140, 81, 115
+.word 4,  43, 180, 81, 115
+.word -1
+
+# porta lógica (AOC): "clic-clac" de relé
+SFX_MONSTRO_PORTA:
+.word 3
+.word 0,  76,  40, 115, 120
+.word 6,  71,  40, 115, 120
+.word -1
+
+# cronômetro: "tique" de relógio a cada segundo nos últimos 10 s
+SFX_TIQUE:
+.word 2
+.word 0,  96,  40, 115, 110
+.word -1
+
 # ---------------------------- Livro do Stewart -----------------------------
 # entrada: acorde menor ameaçador com tímpano
 SFX_CHEFE_ENTRA:

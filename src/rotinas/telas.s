@@ -290,6 +290,12 @@ et_fim:
 estado_jogando:
     addi sp, sp, -4
     sw   ra, 0(sp)
+    li   a0, 0
+    call atualizar_tempo_fase          # cronômetro (se zerar: reprovou por falta)
+    la   t0, estado_jogo
+    lw   t0, 0(t0)
+    li   t1, ESTADO_JOGANDO
+    bne  t0, t1, ej_desenha
     call atualizar_jogador
     call atualizar_monstros
     call colidir_monstros
@@ -298,6 +304,7 @@ estado_jogando:
     call atualizar_particulas
     call verificar_meta
     call verificar_arena
+ej_desenha:
     call atualizar_camera
     call frame_escondido
     call desenhar_cena
@@ -305,6 +312,126 @@ estado_jogando:
     lw   ra, 0(sp)
     addi sp, sp, 4
     ret
+
+
+# --------------------------------------------------------------------------
+# CRONÔMETRO DA FASE
+#   fase_tempo = quadros que faltam (carregar_fase põe F_TEMPO x 60).
+#   atualizar_tempo_fase roda a cada quadro do jogo (estado_jogando) e das
+#   perguntas (estado_pergunta, com a0 = 1: aí ele só desconta, sem matar; se
+#   zerar durante a pergunta, o estudante reprova assim que ela fechar).
+#   Não corre com o chefão já derrotado (explodindo). Nos últimos 10 s faz
+#   "tique" a cada segundo. Se zerar: morte_causa = CAUSA_TEMPO e iniciar_morte
+#   (jogador.s), que passa o filminho "REPROVOU POR FALTA!".
+# --------------------------------------------------------------------------
+atualizar_tempo_fase:
+    la   t0, fase_atual                # fase sem cronômetro
+    lw   t0, 0(t0)
+    lw   t0, F_TEMPO(t0)
+    beqz t0, atf_fim
+    la   t0, chefe_estado              # chefão derrotado: o tempo para
+    lw   t0, 0(t0)
+    li   t1, CH_MORRENDO
+    beq  t0, t1, atf_fim
+    la   t0, fase_tempo
+    lw   t1, 0(t0)
+    blez t1, atf_zerou
+    addi t1, t1, -1
+    sw   t1, 0(t0)
+    li   t2, 600                       # últimos 10 s: tique a cada segundo
+    bgt  t1, t2, atf_fim
+    li   t2, 60
+    remu t2, t1, t2
+    bnez t2, atf_fim
+    beqz t1, atf_fim
+    la   a0, SFX_TIQUE                 # (tocar_som só mexe em t0 e t1)
+    tail tocar_som
+atf_zerou:
+    bnez a0, atf_fim                   # na pergunta: espera ela fechar
+    la   t0, morte_causa
+    li   t1, CAUSA_TEMPO
+    sw   t1, 0(t0)
+    la   t0, jogador_vidas             # os corações ficam vazios
+    sw   zero, 0(t0)
+    tail iniciar_morte
+atf_fim:
+    ret
+
+
+# --------------------------------------------------------------------------
+# desenhar_tempo: o cronômetro "m:ss" no alto da tela, ao lado dos corações.
+#   Branco; amarelo no último minuto; vermelho piscando nos últimos 10 s.
+#   a0 = frame de destino
+# --------------------------------------------------------------------------
+desenhar_tempo:
+    la   t0, fase_atual
+    lw   t0, 0(t0)
+    lw   t0, F_TEMPO(t0)
+    beqz t0, dte_fim
+    addi sp, sp, -12
+    sw   ra, 0(sp)
+    sw   s1, 4(sp)
+    sw   s2, 8(sp)
+    mv   s1, a0
+    la   t0, fase_tempo                # s2 = segundos (arredondando para cima)
+    lw   t0, 0(t0)
+    bgez t0, dte_pos
+    li   t0, 0
+dte_pos:
+    addi t0, t0, 59
+    li   t1, 60
+    divu s2, t0, t1
+    la   t0, texto_tempo               # monta "m:ss"
+    divu t2, s2, t1                    # minutos
+    addi t2, t2, '0'
+    sb   t2, 0(t0)
+    li   t2, ':'
+    sb   t2, 1(t0)
+    remu t2, s2, t1                    # segundos
+    li   t1, 10
+    divu t3, t2, t1
+    addi t3, t3, '0'
+    sb   t3, 2(t0)
+    remu t3, t2, t1
+    addi t3, t3, '0'
+    sb   t3, 3(t0)
+    sb   zero, 4(t0)
+    la   a0, img_relogio_mini
+    li   a1, 44
+    li   a2, 6
+    li   a3, 0
+    mv   a4, s1
+    call desenhar_imagem
+    li   a3, COR_BRANCO
+    li   t0, 60
+    bgt  s2, t0, dte_texto
+    li   a3, COR_AMARELO
+    li   t0, 10
+    bgt  s2, t0, dte_texto
+    li   a3, COR_VERMELHO_CLARO        # últimos 10 s: vermelho piscando
+    la   t0, tempo
+    lw   t0, 0(t0)
+    andi t0, t0, 16
+    beqz t0, dte_texto
+    li   a3, COR_BRANCO
+dte_texto:
+    la   a0, texto_tempo
+    li   a1, 56
+    li   a2, 5
+    mv   a4, s1
+    li   a5, 1
+    call desenhar_texto_sombra
+    lw   ra, 0(sp)
+    lw   s1, 4(sp)
+    lw   s2, 8(sp)
+    addi sp, sp, 12
+dte_fim:
+    ret
+
+.data
+texto_tempo: .space 8
+.align 2
+.text
 
 
 # --------------------------------------------------------------------------
@@ -331,9 +458,13 @@ desenhar_cena:
     mv   a0, s1
     call desenhar_hud
     mv   a0, s1
+    call desenhar_tempo                # cronômetro da fase
+    mv   a0, s1
     call desenhar_dica
     mv   a0, s1
     call desenhar_hud_chefe
+    mv   a0, s1
+    call desenhar_debug                # indicadores dos atalhos de teste (debug.s)
     lw   ra, 0(sp)
     lw   s1, 4(sp)
     addi sp, sp, 8
@@ -415,6 +546,12 @@ estado_concluida:
     sw   ra, 0(sp)
     sw   s1, 4(sp)
     sw   s2, 8(sp)
+    la   t0, fase_atual                # última fase (a formatura): fogos de artifício
+    lw   t0, 0(t0)
+    lw   t0, F_PROXIMA(t0)
+    bnez t0, ec_particulas
+    call fogos_formatura
+ec_particulas:
     call atualizar_particulas
     call frame_escondido
     mv   s1, a0
@@ -428,6 +565,10 @@ estado_concluida:
     li   a4, COR_PAINEL
     mv   a5, s1
     li   a6, COR_VERDE
+    lw   t0, F_PROXIMA(s2)             # formatura: borda dourada
+    bnez t0, ec_painel
+    li   a6, COR_AMARELO
+ec_painel:
     call desenhar_painel
     lw   a0, F_CONCLUIDA(s2)
     li   a1, CENTRO
@@ -466,7 +607,7 @@ ec_mostra:
     li   a0, ESTADO_TRANSICAO
     call mudar_estado
     j    ec_fim
-ec_menu:                               # não tem próxima fase ainda: volta ao menu
+ec_menu:                               # acabou o jogo (formatura): volta ao menu
     la   a0, fase_tutorial
     call carregar_fase
     li   a0, ESTADO_MENU
@@ -478,6 +619,54 @@ ec_fim:
     addi sp, sp, 12
     ret
 
+
+# --------------------------------------------------------------------------
+# fogos_formatura: na tela da formatura, a cada 12 quadros estoura um fogo de
+#   artifício (explosão de partículas) num lugar e numa cor sorteados
+# --------------------------------------------------------------------------
+fogos_formatura:
+    la   t0, estado_timer
+    lw   t0, 0(t0)
+    li   t1, 12
+    remu t0, t0, t1
+    bnez t0, ff_fim
+    addi sp, sp, -8
+    sw   ra, 0(sp)
+    sw   s1, 4(sp)
+    call aleatorio
+    andi t0, a0, 3
+    la   t1, cores_fogos
+    slli t0, t0, 2
+    add  t1, t1, t0
+    lw   s1, 0(t1)                     # s1 = cor
+    call aleatorio
+    li   t0, 280
+    remu t0, a0, t0
+    addi t0, t0, 20
+    la   t1, camera_x                  # (as partículas ficam no mundo)
+    lw   t1, 0(t1)
+    add  t0, t0, t1
+    la   t1, chefe_aux
+    sw   t0, 0(t1)
+    call aleatorio
+    li   t0, 120
+    remu a1, a0, t0
+    addi a1, a1, 20
+    la   t0, chefe_aux
+    lw   a0, 0(t0)
+    mv   a2, s1
+    li   a3, 18
+    call explodir
+    lw   ra, 0(sp)
+    lw   s1, 4(sp)
+    addi sp, sp, 8
+ff_fim:
+    ret
+
+.data
+.align 2
+cores_fogos: .word COR_AMARELO, COR_BRANCO, COR_VERMELHO_CLARO, 0xF8
+.text
 
 # --------------------------------------------------------------------------
 # desenhar_hud: corações e nome da matéria.  a0 = frame de destino

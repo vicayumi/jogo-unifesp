@@ -35,6 +35,11 @@ tabela_teclas:
 .word SC_2, T_RESP_B
 .word SC_3, T_RESP_C
 .word SC_4, T_RESP_D
+# atalhos de teste (rotinas/debug.s)
+.word SC_5, T_DBG_TREINO,   SC_6, T_DBG_FASE1,   SC_7, T_DBG_FASE2,   SC_8, T_DBG_FASE3
+.word SC_9, T_DBG_CHEFE,    SC_0, T_DBG_VENCER,  SC_I, T_DBG_INVENC,  SC_V, T_DBG_VIDA
+.word SC_K, T_DBG_MATAR,    SC_B, T_DBG_GOLPE,   SC_P, T_DBG_PERGUNTA, SC_N, T_DBG_MORRER
+.word SC_G, T_DBG_INFO,     SC_J, T_DBG_PULO,    SC_C, T_DBG_CERTA,   SC_T, T_DBG_TEMPO
 .word 0, 0
 
 # tabela: caractere (byte), -, bit (half)   (termina com 0)

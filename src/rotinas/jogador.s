@@ -133,10 +133,14 @@ aj_pulo_testa:
     la   t0, pulo_buffer
     lw   t1, 0(t0)
     blez t1, aj_mover_y                # nenhum pulo pedido
+    la   t0, debug_pulo_infinito       # atalho de teste J: pula até no ar (debug.s)
+    lw   t0, 0(t0)
+    bnez t0, aj_pula
     la   t0, chao_timer
     lw   t1, 0(t0)
     li   t2, PULO_COYOTE
     bgt  t1, t2, aj_mover_y            # faz tempo que saiu do chão
+aj_pula:
     li   t1, FORCA_PULO                # PULA!
     la   t0, item_energetico
     lw   t0, 0(t0)
@@ -203,6 +207,7 @@ aj_chao:
     sw   zero, 0(t0)
     la   t0, chao_timer
     sw   zero, 0(t0)
+    call verificar_perigo              # pisou em espinhos / curto-circuito?
     j    aj_animacao
 aj_no_ar:
     la   t0, chao_timer
@@ -319,6 +324,9 @@ my_fim:
 #   Perde 1 vida, pisca por INVULN_QUADROS e, sem vidas, começa a morte.
 # --------------------------------------------------------------------------
 dano_jogador:
+    la   t0, debug_invencivel          # atalho de teste I: invencível (debug.s)
+    lw   t0, 0(t0)
+    bnez t0, dj_nada
     la   t0, jogador_invuln
     lw   t1, 0(t0)
     bnez t1, dj_nada
@@ -359,6 +367,63 @@ dj_nada:
 
 
 # --------------------------------------------------------------------------
+# verificar_perigo: o estudante está de pé num bloco que machuca (bloco_perigo,
+#   colisao.s: espinhos da Fase 2, curto-circuito da Fase 3)?
+#   Perde um coração (se não estiver piscando) e é jogado para cima.
+#   Olha dois pontos logo abaixo dos pés (um pouco para dentro das bordas,
+#   para não machucar quem só raspou a ponta do pé na beirada).
+# --------------------------------------------------------------------------
+verificar_perigo:
+    addi sp, sp, -4
+    sw   ra, 0(sp)
+    la   t0, jogador_x
+    lw   a0, 0(t0)
+    addi a0, a0, HIT_X0
+    addi a0, a0, 3
+    la   t0, jogador_y
+    lw   a1, 0(t0)
+    addi a1, a1, HIT_Y1
+    addi a1, a1, 1
+    call ponto_perigo
+    bnez a0, vp_machuca
+    la   t0, jogador_x
+    lw   a0, 0(t0)
+    addi a0, a0, HIT_X1
+    addi a0, a0, -3
+    la   t0, jogador_y
+    lw   a1, 0(t0)
+    addi a1, a1, HIT_Y1
+    addi a1, a1, 1
+    call ponto_perigo
+    beqz a0, vp_fim
+vp_machuca:
+    la   t0, morte_causa               # (morte_info já tem o bloco: ponto_perigo)
+    li   t1, CAUSA_PERIGO
+    sw   t1, 0(t0)
+    li   a0, 0                         # sem empurrão para o lado
+    call dano_jogador
+    la   t0, estado_jogo               # morreu: a animação de morte cuida do resto
+    lw   t0, 0(t0)
+    li   t1, ESTADO_JOGANDO
+    bne  t0, t1, vp_fim
+    la   t0, jogador_vy                # quica para cima (mesmo piscando)
+    li   t1, QUIQUE_PISAO
+    sub  t1, zero, t1
+    sw   t1, 0(t0)
+    la   t0, jogador_frac_y
+    sw   zero, 0(t0)
+    la   t0, jogador_no_chao
+    sw   zero, 0(t0)
+    la   t0, chao_timer
+    li   t1, 99                        # (não vale pular de novo no ar)
+    sw   t1, 0(t0)
+vp_fim:
+    lw   ra, 0(sp)
+    addi sp, sp, 4
+    ret
+
+
+# --------------------------------------------------------------------------
 # iniciar_morte: animação de morte (o estudante salta e cai para fora da tela)
 # --------------------------------------------------------------------------
 iniciar_morte:
@@ -380,13 +445,36 @@ iniciar_morte:
     la   t0, jogador_empurrao
     li   t1, 999                       # mantém a pose de dano durante a queda
     sw   t1, 0(t0)
-    la   t0, chefe_estado              # morreu lutando com o chefão?
+    # o "filminho" de derrota antes da queda (cinema.s; no fim ele volta
+    # para ESTADO_MORTE). Qual filminho depende do que derrotou o estudante:
+    la   t0, morte_causa
+    lw   t1, 0(t0)
+    li   t2, CAUSA_TEMPO               # o cronômetro zerou: "REPROVOU POR FALTA!"
+    beq  t1, t2, imo_tempo
+    la   t0, chefe_estado              # lutando com o chefão: o golpe do chefão
     lw   t0, 0(t0)
-    beqz t0, im_fim
-    li   a0, CINEMA_DERROTA            # passa o "filminho" antes da queda
-    tail iniciar_cinema                #   (cinema.s; no fim ele volta para ESTADO_MORTE)
-im_fim:
-    ret
+    bnez t0, imo_chefe
+    li   t2, CAUSA_MONSTRO             # um monstrinho
+    beq  t1, t2, imo_monstro
+    li   t2, CAUSA_PERIGO              # espinhos ou curto-circuito
+    beq  t1, t2, imo_perigo
+    ret                                # (outra coisa: só cai)
+imo_tempo:
+    li   a0, CINEMA_TEMPO
+    tail iniciar_cinema
+imo_chefe:
+    li   a0, CINEMA_DERROTA
+    tail iniciar_cinema
+imo_monstro:
+    li   a0, CINEMA_MONSTRO
+    la   t0, morte_info
+    lw   a1, 0(t0)
+    tail iniciar_cinema
+imo_perigo:
+    li   a0, CINEMA_PERIGO
+    la   t0, morte_info
+    lw   a1, 0(t0)
+    tail iniciar_cinema
 
 # mover_morte: um quadro da queda (sem colisão nenhuma)
 mover_morte:

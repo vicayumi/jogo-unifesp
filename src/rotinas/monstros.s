@@ -16,6 +16,10 @@
 #     COMP_VOA   voa em onda (ignora a gravidade); vira só nas paredes
 #
 #  Todos têm 16 x 16 pixels. Pisar em cima mata; encostar de lado tira vida.
+#
+#  Cada fase pode deixar os monstros mais rápidos (campo F_VEL_MONSTROS da fase,
+#  em 1/16 de pixel por quadro, somado às velocidades acima): a Fase 2 soma 4 e
+#  a Fase 3 soma 8. O valor fica em monstros_vel_extra (main.s).
 ############################################################################
 
 .data
@@ -202,6 +206,9 @@ monstro_andar:
     sw   s1, 4(sp)
     mv   s1, a0
     li   a1, MONSTRO_VEL_ANDA
+    la   t0, monstros_vel_extra        # fases mais difíceis: monstros mais rápidos
+    lw   t0, 0(t0)
+    add  a1, a1, t0
     call passo_x_monstro
     beqz a0, man_fim
     mv   a0, s1
@@ -369,6 +376,9 @@ monstro_voar:
     sw   t2, 4(s1)                     # y = y base + onda
     mv   a0, s1
     li   a1, MONSTRO_VEL_VOA
+    la   t0, monstros_vel_extra        # fases mais difíceis: monstros mais rápidos
+    lw   t0, 0(t0)
+    add  a1, a1, t0
     call passo_x_monstro
     beqz a0, mvo_fim
     mv   a0, s1
@@ -490,6 +500,9 @@ mp_parou:
 mp_horizontal:
     mv   a0, s1
     li   a1, MONSTRO_VEL_PULA
+    la   t0, monstros_vel_extra        # fases mais difíceis: monstros mais rápidos
+    lw   t0, 0(t0)
+    add  a1, a1, t0
     call passo_x_monstro
     beqz a0, mp_fim
     mv   a0, s1
@@ -574,6 +587,12 @@ cm_dano:
     bge  t1, t2, cm_dir_ok
     li   a0, -1
 cm_dir_ok:
+    la   t0, morte_causa               # (se morrer, o filminho mostra este monstro)
+    li   t1, CAUSA_MONSTRO
+    sw   t1, 0(t0)
+    lw   t1, 16(s1)
+    la   t0, morte_info
+    sw   t1, 0(t0)
     call dano_jogador
     la   t0, estado_jogo
     lw   t0, 0(t0)

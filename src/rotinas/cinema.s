@@ -6,10 +6,19 @@
 #  tela com o retrato GRANDE de quem deu o golpe e o nome do golpe; um clarão
 #  branco; e o retrato de quem levou o golpe, tremendo, com o resultado.
 #
-#    CINEMA_DERROTA   o Livro do Stewart derrota o estudante: "PROVA SURPRESA!"
-#                     -> "REPROVADO!" e depois a queda normal (ESTADO_MORTE)
-#    CINEMA_VITORIA   o estudante derrota o Livro do Stewart: "RESPOSTA CERTA!"
-#                     -> "APROVADO!" e depois o livro explode (ESTADO_JOGANDO)
+#    CINEMA_DERROTA   o chefão derrota o estudante com o golpe dele (Stewart:
+#                     "PROVA SURPRESA!", Grafo: "SEGMENTATION FAULT!", Professor:
+#                     "PROVA DE ASSEMBLY!") -> "REPROVADO!" e depois a queda
+#                     normal (ESTADO_MORTE)
+#    CINEMA_VITORIA   o estudante derrota o chefão: "RESPOSTA CERTA!"
+#                     -> "APROVADO!" e depois o chefão explode (ESTADO_JOGANDO)
+#  Os retratos, o nome e o golpe do chefão vêm do registro dele (chefes.s).
+#    CINEMA_MONSTRO   um monstrinho derrotou o estudante: retrato do monstro e
+#                     o golpe dele (tabela cin_monstros) -> "REPROVADO!"
+#    CINEMA_PERIGO    espinhos / curto-circuito derrotaram o estudante
+#    CINEMA_TEMPO     o cronômetro zerou: o despertador usa "FIM DO TEMPO!"
+#                     -> "REPROVOU POR FALTA!"
+#  Todas as derrotas terminam com a queda normal (ESTADO_MORTE) e o GAME OVER.
 #
 #  Linha do tempo (quadros, 60 por segundo):
 #     0 ..  12   faixas pretas entrando, cena escurecida
@@ -34,8 +43,33 @@
 .data
 .align 2
 cinema_tipo:      .word 0
+cin_vitoria:      .word 0              # 1 = o estudante venceu (as outras são derrotas)
+cin_img:          .word 0              # retrato de quem atacou
+cin_escala:       .word 0              # quantas vezes maior (o retrato fica com ~96 px)
+cin_txts:         .word 0, 0, 0        # "Fulano usa:", golpe, resultado
+cin_res_escala:   .word 3              # tamanho do resultado (2 para textos compridos)
+cin_proj:         .word 0              # projétil que voa embaixo do golpe (0 = nenhum)
+
+# monstrinhos (na ordem dos tipos TIPO_*): "Fulano usa:", golpe
+cin_monstros:
+.word txt_cin_m_calculo,  txt_cin_g_calculo
+.word txt_cin_m_aoc,      txt_cin_g_aoc
+.word txt_cin_m_integral, txt_cin_g_integral
+.word txt_cin_m_lim,      txt_cin_g_lim
+.word txt_cin_m_derivada, txt_cin_g_derivada
+.word txt_cin_m_ponteiro, txt_cin_g_ponteiro
+.word txt_cin_m_pilha,    txt_cin_g_pilha
+.word txt_cin_m_no,       txt_cin_g_no
+.word txt_cin_m_bit,      txt_cin_g_bit
+.word txt_cin_m_bug,      txt_cin_g_bug
+.word txt_cin_m_porta,    txt_cin_g_porta
+# blocos que machucam (bloco 28 = espinhos, 29 = curto-circuito)
+cin_perigos:
+.word txt_cin_m_espinhos, txt_cin_g_espinhos
+.word txt_cin_m_curto,    txt_cin_g_curto
 
 # textos de cada tipo:  atacante (pequeno), golpe (grande), resultado (enorme)
+#   (na derrota, os dois primeiros vêm do registro do chefão: CB_CIN_USA e CB_CIN_GOLPE)
 cin_textos:
 .word txt_cin_stewart_usa, txt_cin_prova, txt_cin_reprovado      # CINEMA_DERROTA
 .word txt_cin_aluno_usa,  txt_cin_resposta, txt_cin_aprovado    # CINEMA_VITORIA
@@ -47,13 +81,111 @@ cin_cores:
 .text
 
 # --------------------------------------------------------------------------
-# iniciar_cinema: a0 = CINEMA_DERROTA ou CINEMA_VITORIA
+# iniciar_cinema: a0 = tipo (CINEMA_*)
+#   a1 = tipo do monstro (CINEMA_MONSTRO) ou número do bloco (CINEMA_PERIGO)
+#   Escolhe o retrato, os textos e o projétil do filminho.
 # --------------------------------------------------------------------------
 iniciar_cinema:
     addi sp, sp, -4
     sw   ra, 0(sp)
     la   t0, cinema_tipo
     sw   a0, 0(t0)
+    la   t0, cin_vitoria               # padrão: derrota, "REPROVADO!" grande
+    sw   zero, 0(t0)
+    la   t0, cin_proj
+    sw   zero, 0(t0)
+    la   t0, cin_res_escala
+    li   t1, 3
+    sw   t1, 0(t0)
+    la   t0, cin_txts
+    la   t1, txt_cin_reprovado
+    sw   t1, 8(t0)
+    li   t1, CINEMA_VITORIA
+    beq  a0, t1, ic_vitoria
+    li   t1, CINEMA_MONSTRO
+    beq  a0, t1, ic_monstro
+    li   t1, CINEMA_PERIGO
+    beq  a0, t1, ic_perigo
+    li   t1, CINEMA_TEMPO
+    beq  a0, t1, ic_tempo
+
+    # ---- o chefão derrotou o estudante ----
+    la   t2, chefe_dados
+    lw   t2, 0(t2)
+    lw   t1, CB_IMG_ABERTO(t2)         # 48 x 48, dobrado = 96 x 96
+    li   t3, 2
+    lw   t4, CB_CIN_USA(t2)
+    lw   t5, CB_CIN_GOLPE(t2)
+    lw   t6, CB_PROJ(t2)
+    la   t0, cin_proj
+    sw   t6, 0(t0)
+    j    ic_guarda
+
+    # ---- o estudante derrotou o chefão ----
+ic_vitoria:
+    la   t0, cin_vitoria
+    li   t1, 1
+    sw   t1, 0(t0)
+    la   t1, anim_estudante_pulo       # 32 x 32, triplicado = 96 x 96
+    lw   t1, 4(t1)
+    li   t3, 3
+    la   t4, txt_cin_aluno_usa
+    la   t5, txt_cin_resposta
+    la   t0, cin_txts
+    la   t6, txt_cin_aprovado
+    sw   t6, 8(t0)
+    j    ic_guarda
+
+    # ---- um monstrinho (a1 = tipo) ----
+ic_monstro:
+    slli t2, a1, 2
+    la   t1, imagens_monstros
+    add  t1, t1, t2
+    lw   t1, 0(t1)                     # 16 x 16, 6 vezes maior = 96 x 96
+    li   t3, 6
+    slli t2, a1, 3
+    la   t0, cin_monstros
+    add  t0, t0, t2
+    lw   t4, 0(t0)
+    lw   t5, 4(t0)
+    j    ic_guarda
+
+    # ---- espinhos / curto-circuito (a1 = número do bloco) ----
+ic_perigo:
+    slli t2, a1, 2
+    la   t1, blocos
+    add  t1, t1, t2
+    lw   t1, 0(t1)                     # o desenho do bloco, 6 vezes maior
+    li   t3, 6
+    addi t2, a1, -28                   # 28 = espinhos, 29 = curto-circuito
+    slli t2, t2, 3
+    la   t0, cin_perigos
+    add  t0, t0, t2
+    lw   t4, 0(t0)
+    lw   t5, 4(t0)
+    j    ic_guarda
+
+    # ---- o cronômetro zerou ----
+ic_tempo:
+    la   t1, img_relogio               # 32 x 32, triplicado = 96 x 96
+    li   t3, 3
+    la   t4, txt_cin_relogio_usa
+    la   t5, txt_cin_relogio_golpe
+    la   t0, cin_txts
+    la   t6, txt_cin_reprovou_falta
+    sw   t6, 8(t0)
+    la   t0, cin_res_escala            # texto comprido: um pouco menor
+    li   t6, 2
+    sw   t6, 0(t0)
+
+ic_guarda:
+    la   t0, cin_img
+    sw   t1, 0(t0)
+    la   t0, cin_escala
+    sw   t3, 0(t0)
+    la   t0, cin_txts
+    sw   t4, 0(t0)
+    sw   t5, 4(t0)
     li   a0, ESTADO_CINEMA
     call mudar_estado
     call parar_musica
@@ -79,8 +211,8 @@ estado_cinema:
 
     la   t0, estado_timer
     lw   s2, 0(t0)                     # s2 = quadro do filminho
-    la   t0, cinema_tipo
-    lw   s6, 0(t0)                     # s6 = tipo
+    la   t0, cin_vitoria
+    lw   s6, 0(t0)                     # s6 = 1 vitória, 0 derrota
 
     li   t0, 30                        # ENTER pula
     blt  s2, t0, cin_segue
@@ -166,15 +298,10 @@ cin_p1_faixa:
     addi a2, a2, 8
     li   a3, 0
     mv   a4, s1
-    bnez s6, cin_p1_aluno
-    la   a0, img_chefe_stewart_aberto   # 48 x 48, dobrado = 96 x 96
-    li   a5, 2
-    j    cin_p1_retrato
-cin_p1_aluno:
-    la   a0, anim_estudante_pulo       # 32 x 32, triplicado = 96 x 96
-    lw   a0, 4(a0)
-    li   a5, 3
-cin_p1_retrato:
+    la   t0, cin_img                   # retrato de quem atacou (iniciar_cinema)
+    lw   a0, 0(t0)
+    la   t0, cin_escala
+    lw   a5, 0(t0)
     call desenhar_imagem_escala
 
     bnez s4, cin_barras                # textos só quando a faixa chegou
@@ -195,7 +322,9 @@ cin_p1_retrato:
     li   a5, 2
     call desenhar_texto_sombra
 
-    bnez s6, cin_barras                # derrota: integrais voando embaixo do nome
+    la   t0, cin_proj                  # derrota pelo chefão: projéteis voando embaixo do nome
+    lw   t0, 0(t0)
+    beqz t0, cin_barras
     li   s5, 0
 cin_p1_integrais:
     li   t0, 53
@@ -211,7 +340,8 @@ cin_p1_integrais:
     slli t1, t1, 3
     li   a2, 150
     sub  a2, a2, t1
-    la   a0, img_proj_integral
+    la   a0, cin_proj
+    lw   a0, 0(a0)
     li   a3, 0
     mv   a4, s1
     call desenhar_imagem
@@ -268,7 +398,9 @@ cin_p2_livro:
     lw   t0, 0(t0)
     andi t0, t0, 4
     bnez t0, cin_p2_faiscas
-    la   a0, img_chefe_stewart_fechado
+    la   a0, chefe_dados               # o chefão pisca, como quando leva dano
+    lw   a0, 0(a0)
+    lw   a0, CB_IMG(a0)
     li   a5, 2
     call desenhar_imagem_escala
 
@@ -329,9 +461,14 @@ cin_barras:
     call cin_texto
     li   a1, CENTRO
     li   a2, 201
+    la   t0, cin_res_escala            # texto comprido ("REPROVOU POR FALTA!"): menor
+    lw   a5, 0(t0)
+    li   t0, 3
+    beq  a5, t0, cin_res_y
+    li   a2, 207
+cin_res_y:
     mv   a3, s4
     mv   a4, s1
-    li   a5, 3
     call desenhar_texto
 cin_mostra:
     call mostrar_frame
@@ -362,7 +499,7 @@ cin_fim:
 
 # cin_cor: a0 = qual cor (0 a 3)  ->  a0 = cin_cores[tipo][qual]
 cin_cor:
-    la   t0, cinema_tipo
+    la   t0, cin_vitoria
     lw   t0, 0(t0)
     slli t0, t0, 4
     slli a0, a0, 2
@@ -372,16 +509,12 @@ cin_cor:
     lw   a0, 0(t0)
     ret
 
-# cin_texto: a0 = qual texto (0 a 2)  ->  a0 = endereço do texto
+# cin_texto: a0 = qual texto (0 = "Fulano usa:", 1 = golpe, 2 = resultado)
+#   ->  a0 = endereço do texto (escolhido por iniciar_cinema)
 cin_texto:
-    la   t0, cinema_tipo
-    lw   t0, 0(t0)
-    li   t1, 12
-    mul  t0, t0, t1
     slli a0, a0, 2
+    la   t0, cin_txts
     add  t0, t0, a0
-    la   t1, cin_textos
-    add  t0, t0, t1
     lw   a0, 0(t0)
     ret
 
